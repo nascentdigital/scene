@@ -26,7 +26,6 @@ export interface ScenePage extends Page {
 
 
 // constants
-export const TOKEN_PAGE = Symbol("scene:ScenePage");
 const log = Scribe.getLog("scene:Scene");
 
 
