@@ -14,6 +14,8 @@ export interface SceneContext extends BrowserContext {
 
 export interface ScenePage extends Page {
 
+    context(): SceneContext;
+
     /**
      * Navigates to the specified URL, waiting until the page and all resources are fetched.
      *
