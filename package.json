@@ -4,7 +4,7 @@
     "description": "Still in progress.",
     "license": "MIT",
     "author": "Simeon de Dios <simeon@nascentdigital.com>",
-    "private": true,
+    "private": false,
     "repository": {
         "type": "git",
         "url": "git+https://github.com/nascentdigital/scene.git"
