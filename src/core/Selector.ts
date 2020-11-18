@@ -1,5 +1,4 @@
 // types
-
 export enum SceneMarker {
     /**
      * An HTML element that represents a UI web flow.
@@ -22,106 +21,108 @@ export enum SceneMarker {
     ELEMENT = 'elem'
 }
 
-// helper
-export class Selector {
-
-    private constructor() {
-    }
-
-    static for(name: string, type: SceneMarker = SceneMarker.COMPONENT, id?: string) {
-
-        // create base selector
-        let selector = `*[data-scene-${type}="${name}"]`;
-
-        // add id selector if provided
-        if (id) {
-            selector += `[data-scene-id="${id}"]`;
-        }
-
-        // return selector
-        return new SelectorBuilder(selector);
-    }
-
-    /**
-     * Creates an HTML data attribute that is intended to be attached to an HTML element, thereby "tagging" it with metadata
-     * to support automated testing using [Scene](https://github.com/nascentdigital/scene).
-     *
-     * @param name - An name of the flow / page / component / element.
-     * @param [markerType] - The type of the marker (defaults to [component]{@link SceneMarker.COMPONENT}).
-     * @param [id] - The identifier of the element (should be unique within its name + type).
-     * @returns An attribute key / value that can be attached to an HTML element.
-     */
-    static createMarker(name: string, markerType = SceneMarker.COMPONENT, id?: string) {
-
-        // create attributes
-        const attributes: any = {};
-
-        // apply marker (if not testing)
-        attributes[`data-scene-${markerType}`] = name;
-        if (id) {
-            attributes['data-scene-id'] = id;
-        }
-
-        // return attributes
-        return attributes;
-    }
-
-    /**
-     * Creates an HTML data attribute that adds an attribute which identifies the parent that this component + element is
-     * a part of.  This marker should be used in conjunction with {@link createSceneMarker}.
-     *
-     * @param {string} name - The name of the parent [component]{@link SceneMarker.COMPONENT} or
-     *      [element]{@link SceneMarker.ELEMENT} that this HTML element belongs to.
-     * @param {SceneMarker} [markerType] - The type of the parent (defaults to [component]{@link SceneMarker.COMPONENT}).
-     * @param {SceneMarker} [id] - The identifier of the parent (should be unique within its name + type).
-     * @returns {object} an attribute key / value that can be attached to an HTML element reference.
-     */
-    static createMarkerRef(name: string, markerType = SceneMarker.COMPONENT, id: string) {
-
-        // create attributes
-        const attributes: any = {};
-
-        // apply marker (if not testing)
-        attributes['data-scene-ref'] = id
-            ? `${markerType}:${name}:${id}`
-            : `${markerType}:${name}`;
-
-        // return attributes
-        return attributes;
-    }
+export interface ISelectable {
+    dataAttributes: Record<string, string>;
+    querySelector: string;
 }
+export type ISelectableKeys = keyof ISelectable;
+export type ISelectableMap<T extends string> = Omit<Record<T, ISelectable>, ISelectableKeys>;
 
-class SelectorBuilder {
+// builder
+export class Selector<T extends string> implements ISelectable {
 
-    private contextSelector?: string;
-
-
-    constructor(private readonly baseSelector: string) {
+    static forPage(name: string, id?: string) {
+        return new Selector(SceneMarker.PAGE, name, id);
     }
 
-    in(name: string, type: SceneMarker = SceneMarker.COMPONENT, id?: string) {
-
-        // create context selector
-        const referenceId = id
-            ? `${type}:${name}:${id}`
-            : `${type}:${name}`;
-        this.contextSelector = `[data-scene-ref="${referenceId}"]`;
-
-        // return builder
-        return this;
+    static forComponent(name: string, id?: string) {
+        return new Selector(SceneMarker.COMPONENT, name, id);
     }
 
-    build(): string {
 
-        // create base
-        let selector = `css=${this.baseSelector}`;
+    public readonly dataAttributes: Record<string, string>;
+    public readonly querySelector: string;
 
-        // add context (if available)
-        if (this.contextSelector) {
-            selector += this.contextSelector;
+
+    private constructor(
+        private readonly type: SceneMarker,
+        private readonly name: string,
+        private readonly id?: string,
+        public children: ISelectableMap<T> = {} as ISelectableMap<T>) {
+
+        // initialize instance variables
+        const { dataAttributes, querySelector } = Selector.createSelectable(type, name, id);
+        this.dataAttributes = dataAttributes;
+        this.querySelector = querySelector;
+    }
+
+    public withComponent<K extends string>(name: string, id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.COMPONENT, name, id);
+    }
+
+    public withButton<K extends string>(id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Button", id);
+    }
+
+    public withCheckbox<K extends string>(id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Checkbox", id);
+    }
+
+    public withTextField<K extends string>(id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "TextField", id);
+    }
+
+    public withRadioButton<K extends string>(id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "RadioButton", id);
+    }
+
+    public withLabel<K extends string>(id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Label", id);
+    }
+
+    public withText<K extends string>(id: K): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Text", id);
+    }
+
+    public withChild<K extends string>(type: SceneMarker, name: string, id: K): Selector<T | K> {
+
+        // merge children
+        const children = Object.assign(
+            {},
+            this.children,
+            { [id]: Selector.createSelectable(type, name, id, this) } as ISelectableMap<K>
+        ) as ISelectableMap<T | K>
+
+        // chain extended
+        return new Selector<T | K>(this.type, this.name, this.id, children);
+    }
+
+    private static createSelectable(type: SceneMarker, name: string, id?: string, parent?: Selector<string>): ISelectable {
+
+        // initialize data attributes
+        const dataAttributes: Record<string, string> = {
+            [`data-scene-${type}`]: name
         }
 
-        // return selector
-        return selector;
+        // initialize query selector
+        let querySelector = `css=*[data-scene-${type}="${name}"]`;
+
+        // bind id, if provided
+        if (id) {
+            dataAttributes[`data-scene-id`] = id;
+            querySelector += `[data-scene-id="${id}"]`;
+        }
+
+        // bind parent, if provided
+        if (parent) {
+            const parentIdentifier = parent.id
+                ? `${parent.type}:${parent.name}:${parent.id}`
+                : `${parent.type}:${parent.name}`;
+            dataAttributes[`data-scene-ref`] = parentIdentifier;
+            querySelector += `[data-scene-ref="${parentIdentifier}"]`;
+        }
+
+        // return selectable
+        return { dataAttributes, querySelector };
     }
 }
