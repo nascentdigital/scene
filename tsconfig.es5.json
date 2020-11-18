@@ -1,12 +1,11 @@
 {
     "compilerOptions": {
-        "target": "es2018",
+        "target": "es5",
         "module": "commonjs",
-        "moduleResolution": "node",
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "outDir": "./lib",
+        "outDir": "./es5",
         "downlevelIteration": true,
         "strict": true,
         "types": [
@@ -19,6 +18,7 @@
         "src/**/*"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+
     ]
 }

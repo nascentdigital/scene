@@ -2,7 +2,7 @@
 import os from "os";
 import path from "path";
 import playwright, { Browser } from "playwright";
-import { isBrowserType } from "../core/BrowserType";
+import { isBrowserType } from "./BrowserType";
 
 
 // constants

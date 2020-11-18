@@ -3,6 +3,7 @@
 node_modules
 
 #build
+/es5
 /lib
 
 #dev
