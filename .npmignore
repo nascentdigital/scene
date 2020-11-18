@@ -1,5 +1,7 @@
 
 # dev
+.idea
+.vscode
 .gitignore
 node_modules
 tsconfig*
