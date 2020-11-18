@@ -12,7 +12,7 @@
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "scripts": {
-        "prepublish": "npm run build",
+        "prepublishOnly": "npm run build",
         "build": "npm-run-all -s clean build::*",
         "build::es6": "tsc -P tsconfig.json",
         "build::es5": "tsc -P tsconfig.es5.json",
