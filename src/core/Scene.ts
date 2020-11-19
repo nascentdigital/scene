@@ -22,6 +22,15 @@ export interface ScenePage extends Page {
      * @param url - The URL of the page to load.
      */
     navigateTo(url: URL): Promise<null | Response>;
+
+    /**
+     * Waits for the page location to match the specified URL pattern, throwing if a timout occurs first.
+     *
+     * @param urlRegex - A regular expression pattern that will be matched against the absolute URL string, including
+     *                  query parameters.
+     * @param timeout - The timeout in milliseconds.
+     */
+    waitForUrl(urlRegex: RegExp, timeout: number): Promise<void>;
 }
 
 
@@ -153,6 +162,11 @@ export class Scene {
                     return (url: URL) => this.navigateTo(url, instance);
                 }
 
+                // intercept the "waitForUrl" method
+                if (prop === "waitForUrl") {
+                    return (urlRegex: RegExp, timeout: number) => this.waitForUrl(urlRegex, timeout, instance);
+                }
+
                 // proxy getter
                 return (instance as any)[prop];
             },
@@ -196,5 +210,19 @@ export class Scene {
 
         // navigate to page
         await page.goto(url.href, { waitUntil: "load" });
+    }
+
+    private async waitForUrl(urlRegex: RegExp, timeout: number, page: Page) {
+
+        // return immediately if URL is already matched
+        if (urlRegex.test(page.url())) {
+            return;
+        }
+
+        // wait for next step to load
+        await page.waitForNavigation({
+            url: urlRegex,
+            timeout
+        });
     }
 }

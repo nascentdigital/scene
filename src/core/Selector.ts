@@ -28,6 +28,7 @@ export interface ISelectable {
 export type ISelectableKeys = keyof ISelectable;
 export type ISelectableMap<T extends string> = Omit<Record<T, ISelectable>, ISelectableKeys>;
 
+
 // builder
 export class Selector<T extends string> implements ISelectable {
 
@@ -56,48 +57,55 @@ export class Selector<T extends string> implements ISelectable {
         this.querySelector = querySelector;
     }
 
-    public withComponent<K extends string>(name: string, id: K): Selector<T | K> {
+    public withComponent<K extends string>(name: string, id: K, css?: string): Selector<T | K> {
         return this.withChild(SceneMarker.COMPONENT, name, id);
     }
 
-    public withButton<K extends string>(id: K): Selector<T | K> {
+    public withButton<K extends string>(id: K, css?: string): Selector<T | K> {
         return this.withChild(SceneMarker.ELEMENT, "Button", id);
     }
 
-    public withCheckbox<K extends string>(id: K): Selector<T | K> {
+    public withCheckbox<K extends string>(id: K, css?: string): Selector<T | K> {
         return this.withChild(SceneMarker.ELEMENT, "Checkbox", id);
     }
 
-    public withTextField<K extends string>(id: K): Selector<T | K> {
+    public withTextField<K extends string>(id: K, css?: string): Selector<T | K> {
         return this.withChild(SceneMarker.ELEMENT, "TextField", id);
     }
 
-    public withRadioButton<K extends string>(id: K): Selector<T | K> {
+    public withRadioButton<K extends string>(id: K, css?: string): Selector<T | K> {
         return this.withChild(SceneMarker.ELEMENT, "RadioButton", id);
     }
 
-    public withLabel<K extends string>(id: K): Selector<T | K> {
+    public withLabel<K extends string>(id: K, css?: string): Selector<T | K> {
         return this.withChild(SceneMarker.ELEMENT, "Label", id);
     }
 
-    public withText<K extends string>(id: K): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "Text", id);
+    public withText<K extends string>(id: K, css?: string): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Text", id, css);
     }
 
-    public withChild<K extends string>(type: SceneMarker, name: string, id: K): Selector<T | K> {
+    public withImage<K extends string>(id: K, css?: string): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Image", id);
+    }
+
+    public withLink<K extends string>(id: K, css?: string): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Link", id);
+    }
+
+    public withChild<K extends string>(type: SceneMarker, name: string, id: K, css?: string): Selector<T | K> {
 
         // merge children
-        const children = Object.assign(
-            {},
+        Object.assign(
             this.children,
-            { [id]: Selector.createSelectable(type, name, id, this) } as ISelectableMap<K>
-        ) as ISelectableMap<T | K>
+            { [id]: Selector.createSelectable(type, name, id, css, this) } as ISelectableMap<K>
+        );
 
-        // chain extended
-        return new Selector<T | K>(this.type, this.name, this.id, children);
+        // chain
+        return this as Selector<T | K>;
     }
 
-    private static createSelectable(type: SceneMarker, name: string, id?: string, parent?: Selector<string>): ISelectable {
+    private static createSelectable(type: SceneMarker, name: string, id?: string, css?: string, parent?: Selector<string>): ISelectable {
 
         // initialize data attributes
         const dataAttributes: Record<string, string> = {
@@ -120,6 +128,11 @@ export class Selector<T extends string> implements ISelectable {
                 : `${parent.type}:${parent.name}`;
             dataAttributes[`data-scene-ref`] = parentIdentifier;
             querySelector += `[data-scene-ref="${parentIdentifier}"]`;
+        }
+
+        // add additional CSS if any
+        if (css) {
+            querySelector += css
         }
 
         // return selectable
