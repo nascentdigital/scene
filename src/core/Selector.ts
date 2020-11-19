@@ -58,27 +58,27 @@ export class Selector<T extends string> implements ISelectable {
     }
 
     public withComponent<K extends string>(name: string, id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.COMPONENT, name, id);
+        return this.withChild(SceneMarker.COMPONENT, name, id, css);
     }
 
     public withButton<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "Button", id);
+        return this.withChild(SceneMarker.ELEMENT, "Button", id, css);
     }
 
     public withCheckbox<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "Checkbox", id);
+        return this.withChild(SceneMarker.ELEMENT, "Checkbox", id, css);
     }
 
     public withTextField<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "TextField", id);
+        return this.withChild(SceneMarker.ELEMENT, "TextField", id, css);
     }
 
     public withRadioButton<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "RadioButton", id);
+        return this.withChild(SceneMarker.ELEMENT, "RadioButton", id, css);
     }
 
     public withLabel<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "Label", id);
+        return this.withChild(SceneMarker.ELEMENT, "Label", id, css);
     }
 
     public withText<K extends string>(id: K, css?: string): Selector<T | K> {
@@ -86,11 +86,11 @@ export class Selector<T extends string> implements ISelectable {
     }
 
     public withImage<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "Image", id);
+        return this.withChild(SceneMarker.ELEMENT, "Image", id, css);
     }
 
     public withLink<K extends string>(id: K, css?: string): Selector<T | K> {
-        return this.withChild(SceneMarker.ELEMENT, "Link", id);
+        return this.withChild(SceneMarker.ELEMENT, "Link", id, css);
     }
 
     public withChild<K extends string>(type: SceneMarker, name: string, id: K, css?: string): Selector<T | K> {
