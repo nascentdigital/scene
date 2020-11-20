@@ -105,6 +105,24 @@ export class Selector<T extends string> implements ISelectable {
         return this as Selector<T | K>;
     }
 
+    public withCss<K extends string>(id: K, css: string) {
+
+        // create selectable
+        const selectable: ISelectable = {
+            dataAttributes: {},
+            querySelector:  `${this.querySelector}${css}`
+        };
+
+        // merge children
+        Object.assign(
+            this.children,
+            { [id]: selectable } as ISelectableMap<K>
+        );
+
+        // chain
+        return this as Selector<T | K>;
+    }
+
     private static createSelectable(type: SceneMarker, name: string, id?: string, css?: string, parent?: Selector<string>): ISelectable {
 
         // initialize data attributes
