@@ -93,6 +93,10 @@ export class Selector<T extends string> implements ISelectable {
         return this.withChild(SceneMarker.ELEMENT, "Link", id, css);
     }
 
+    public withSelect<K extends string>(id: K, css?: string): Selector<T | K> {
+        return this.withChild(SceneMarker.ELEMENT, "Select", id, css);
+    }
+
     public withChild<K extends string>(type: SceneMarker, name: string, id: K, css?: string): Selector<T | K> {
 
         // merge children
